@@ -6,11 +6,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import androidx.navigation.navDeepLink
-import com.PreParcial.C00367123.data.model.Pet
+import com.PreParcial.C00367123.data.model.petList
 import com.PreParcial.C00367123.ui.screens.DetailScreen
 import com.PreParcial.C00367123.ui.screens.HomeScreen
-import com.google.gson.Gson
 
 @Composable
 fun AppNavigation() {
@@ -21,19 +19,23 @@ fun AppNavigation() {
         composable("home") {
             HomeScreen(
                 onPetClick = { pet ->
-                    val petJson = Gson().toJson(pet)
-                    navController.navigate("detail/$petJson")
+                    navController.navigate("detail/${pet.id}")
                 }
             )
         }
 
         composable(
-            "detail/{pet}",
-            arguments = listOf(navArgument("pet") { type = NavType.StringType })
+            "detail/{petId}",
+            arguments = listOf(navArgument("petId") { type = NavType.IntType })
         ) { backStackEntry ->
-            val petJson = backStackEntry.arguments?.getString("pet")
-            val pet = Gson().fromJson(petJson, Pet::class.java)
-            DetailScreen(pet = pet)
+            val petId = backStackEntry.arguments?.getInt("petId")
+            val pet = petList.find { it.id == petId }
+
+            if (pet != null) {
+                DetailScreen(pet = pet, navController = navController)
+            } else {
+                navController.popBackStack()
+            }
         }
     }
 }
